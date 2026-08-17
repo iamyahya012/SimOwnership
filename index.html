@@ -785,6 +785,65 @@
             cursor.style.opacity = '1';
         });
 
+        // =============================
+        // ANALYTICS CLICK TRACKING
+        // Tracks real user interactions like modern social analytics:
+        // event, element, text, page, target, timestamp, session and client IDs.
+        // Data is shared with analytics-dashboard.html on the same GitHub Pages origin.
+        // =============================
+        const ANALYTICS_CLICK_KEY = 'analyticsClicks';
+        const ANALYTICS_SESSION_KEY = 'analyticsSessionId';
+        const ANALYTICS_CLIENT_KEY = 'analyticsClientId';
+
+        function getOrCreateId(key) {
+            let id = localStorage.getItem(key);
+            if (!id) {
+                id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+                localStorage.setItem(key, id);
+            }
+            return id;
+        }
+
+        const analyticsSessionId = getOrCreateId(ANALYTICS_SESSION_KEY);
+        const analyticsClientId = getOrCreateId(ANALYTICS_CLIENT_KEY);
+
+        function safeText(value, max = 120) {
+            return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max);
+        }
+
+        function recordClick(event, eventName = 'click') {
+            const target = event.target;
+            const el = target.closest('button, a, [role="button"], input, select, textarea, .result-item');
+            if (!el) return;
+
+            // Do not record sensitive input values.
+            const tag = el.tagName.toLowerCase();
+            const element = el.id ? `#${el.id}` : (el.className && typeof el.className === 'string' ? `.${el.className.trim().split(/\s+/).slice(0,2).join('.')}` : tag);
+            const label = safeText(el.getAttribute('aria-label') || el.dataset.trackName || el.innerText || el.getAttribute('title') || el.value || tag);
+            const href = el.tagName === 'A' ? (el.getAttribute('href') || '') : '';
+
+            const clicks = JSON.parse(localStorage.getItem(ANALYTICS_CLICK_KEY) || '[]');
+            clicks.push({
+                id: (crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2),
+                event: eventName,
+                element,
+                label,
+                page: window.location.pathname + window.location.hash,
+                target: href,
+                timestamp: new Date().toISOString(),
+                sessionId: analyticsSessionId,
+                clientId: analyticsClientId,
+                x: typeof event === 'object' && event ? event.clientX : null,
+                y: typeof event === 'object' && event ? event.clientY : null,
+                ip: localStorage.getItem('analyticsClientIP') || 'Pending'
+            });
+            localStorage.setItem(ANALYTICS_CLICK_KEY, JSON.stringify(clicks.slice(-5000)));
+        }
+
+        // Capture every meaningful click, including footer links, search, result cards and future buttons.
+        document.addEventListener('click', (event) => recordClick(event, 'click'), true);
+
+        // =============================
         // DOM Elements
         const phoneInput = document.getElementById('phoneInput');
         const searchBtn = document.getElementById('searchBtn');
@@ -814,6 +873,19 @@
 
             hideError();
             loader.classList.add('show');
+
+            // Record a dedicated search event in addition to the button click.
+            const searches = JSON.parse(localStorage.getItem('analyticsSearches') || '[]');
+            searches.push({
+                phone: phoneNumber,
+                timestamp: new Date().toISOString(),
+                success: false,
+                resultsFound: false,
+                ip: localStorage.getItem('analyticsClientIP') || 'Pending',
+                sessionId: analyticsSessionId,
+                clientId: analyticsClientId
+            });
+            localStorage.setItem('analyticsSearches', JSON.stringify(searches.slice(-5000)));
             results.classList.remove('show');
             searchBtn.disabled = true;
 
@@ -833,6 +905,12 @@
                     }
 
                     displayResults(data);
+                    const searches = JSON.parse(localStorage.getItem('analyticsSearches') || '[]');
+                    if (searches.length) {
+                        searches[searches.length - 1].success = true;
+                        searches[searches.length - 1].resultsFound = true;
+                        localStorage.setItem('analyticsSearches', JSON.stringify(searches));
+                    }
                 })
                 .catch(error => {
                     loader.classList.remove('show');
@@ -938,6 +1016,30 @@
         function hideError() {
             errorMsg.classList.remove('show');
         }
+
+        // Fetch visitor IP once and reuse it for analytics.
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(d => {
+                if (d && d.ip) localStorage.setItem('analyticsClientIP', d.ip);
+            })
+            .catch(() => {});
+
+        // Record a page view as an analytics event.
+        const clicksAtLoad = JSON.parse(localStorage.getItem(ANALYTICS_CLICK_KEY) || '[]');
+        clicksAtLoad.push({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+            event: 'page_view',
+            element: 'document',
+            label: document.title,
+            page: window.location.pathname + window.location.hash,
+            target: '',
+            timestamp: new Date().toISOString(),
+            sessionId: analyticsSessionId,
+            clientId: analyticsClientId,
+            ip: localStorage.getItem('analyticsClientIP') || 'Pending'
+        });
+        localStorage.setItem(ANALYTICS_CLICK_KEY, JSON.stringify(clicksAtLoad.slice(-5000)));
 
         // Auto-focus on load
         phoneInput.focus();
