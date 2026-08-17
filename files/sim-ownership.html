@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIM Ownership Database - Enterprise Edition by Yahya">
+    <meta name="theme-color" content="#ffd700">
+    <title>SIM Ownership By Yahya - Enterprise Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0d1b2a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: none;
+            overflow-x: hidden;
+            color: #e8e8e8;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Premium Animated Background */
+        .bg-premium {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.12;
+            animation: float-smooth 25s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #ffd700, #ffed4e);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #00d4ff, #0099cc);
+            bottom: -150px;
+            right: -150px;
+            animation-delay: 3s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #00ff88, #00cc66);
+            top: 50%;
+            left: 50%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float-smooth {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(30px, -30px); }
+            50% { transform: translate(-30px, 30px); }
+            75% { transform: translate(30px, 30px); }
+        }
+
+        /* Premium Cursor */
+        .cursor {
+            position: fixed;
+            width: 25px;
+            height: 25px;
+            border: 2px solid #ffd700;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: all 0.15s ease-out;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), inset 0 0 15px rgba(255, 215, 0, 0.2);
+            opacity: 1;
+        }
+
+        .cursor::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 50%;
+            animation: rotate-cursor 4s linear infinite;
+        }
+
+        .cursor::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #ffd700;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px #ffd700;
+        }
+
+        @keyframes rotate-cursor {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .cursor.active {
+            width: 40px;
+            height: 40px;
+            border-color: #00ff88;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.8), inset 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Premium Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Premium Header */
+        .header {
+            text-align: center;
+            margin-bottom: 70px;
+            animation: slideDown 1s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 255, 136, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 0.85em;
+            letter-spacing: 2px;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4.5em;
+            background: linear-gradient(135deg, #ffd700 0%, #00ff88 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #b0b0c0;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Premium Card */
+        .card {
+            background: linear-gradient(135deg, rgba(20, 30, 60, 0.8) 0%, rgba(15, 25, 50, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 25px;
+            padding: 60px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 100px rgba(255, 215, 0, 0.05);
+            animation: slideUp 1s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.05), transparent);
+            animation: premium-shimmer 4s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes premium-shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 40px;
+            z-index: 2;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.03), rgba(0, 255, 136, 0.02));
+            border: 2px solid rgba(255, 215, 0, 0.25);
+            border-radius: 18px;
+            padding: 18px 30px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .search-box:focus-within {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(0, 255, 136, 0.05));
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(255, 215, 0, 0.05);
+        }
+
+        .search-icon {
+            font-size: 1.8em;
+            color: #ffd700;
+            animation: premium-pulse 2.5s ease-in-out infinite;
+            min-width: 30px;
+        }
+
+        @keyframes premium-pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.15); }
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e8e8e8;
+            font-size: 1.05em;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(184, 184, 192, 0.6);
+        }
+
+        input[type="text"]::selection {
+            background: rgba(255, 215, 0, 0.25);
+            color: #e8e8e8;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border: none;
+            color: #0a0e27;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-size: 0.95em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            white-space: nowrap;
+        }
+
+        .btn-search::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: left 0.4s ease;
+            z-index: -1;
+        }
+
+        .btn-search:hover::before {
+            left: 100%;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 50px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-search:active {
+            transform: translateY(-2px);
+        }
+
+        .btn-search:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Premium Loader */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .loader.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 215, 0, 0.15);
+            border-top: 3px solid #ffd700;
+            border-right: 3px solid #00ff88;
+            border-radius: 50%;
+            animation: premium-spin 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            margin: 0 auto 25px;
+        }
+
+        @keyframes premium-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            color: #ffd700;
+            font-size: 1.05em;
+            margin-top: 20px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        /* Premium Results */
+        .results {
+            display: none;
+            z-index: 2;
+            position: relative;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 28px;
+            margin-top: 40px;
+        }
+
+        .result-item {
+            background: linear-gradient(135deg, rgba(30, 45, 80, 0.6), rgba(20, 35, 70, 0.4));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 18px;
+            padding: 28px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            word-break: break-word;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.03), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .result-item:hover::before {
+            opacity: 1;
+        }
+
+        .result-item:hover {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, rgba(40, 60, 100, 0.8), rgba(25, 40, 75, 0.6));
+            transform: translateY(-8px);
+            box-shadow: 
+                0 20px 50px rgba(255, 215, 0, 0.2),
+                0 0 50px rgba(255, 215, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .result-label {
+            color: #ffd700;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-value {
+            color: #e8e8e8;
+            font-size: 1.15em;
+            font-weight: 500;
+            line-height: 1.6;
+            letter-spacing: 0.3px;
+        }
+
+        .nested-object {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.03), rgba(0, 255, 136, 0.02));
+            border-left: 3px solid #00ff88;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .nested-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .nested-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .nested-label {
+            color: #00ff88;
+            font-size: 0.78em;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 5px;
+        }
+
+        .nested-value {
+            color: #d0d0d0;
+            font-size: 0.98em;
+            word-break: break-word;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        /* Premium Error */
+        .error-message {
+            background: linear-gradient(135deg, rgba(255, 67, 67, 0.1), rgba(220, 50, 50, 0.08));
+            border: 2px solid rgba(255, 67, 67, 0.4);
+            color: #ff6b6b;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 25px;
+            display: none;
+            z-index: 2;
+            position: relative;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            letter-spacing: 0.5px;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s cubic-bezier(0.36, 0, 0.66, -0.56);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-12px); }
+            75% { transform: translateX(12px); }
+        }
+
+        /* Premium Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #b0b0c0;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            margin-top: 70px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer p {
+            margin-bottom: 12px;
+            opacity: 0.85;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .footer a {
+            color: #ffd700;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer a::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #ffd700;
+            transition: width 0.3s ease;
+        }
+
+        .footer a:hover::after {
+            width: 100%;
+        }
+
+        .footer a:hover {
+            color: #00ff88;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .header h1 {
+                font-size: 3.5em;
+            }
+
+            .container {
+                padding: 40px 30px;
+            }
+
+            .card {
+                padding: 40px;
+            }
+
+            .result-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.8em;
+            }
+
+            .header {
+                margin-bottom: 50px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+
+            .container {
+                padding: 30px 15px;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .search-box {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .btn-search {
+                width: 100%;
+            }
+
+            .result-item {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .header-badge {
+                font-size: 0.75em;
+                padding: 10px 18px;
+            }
+
+            .card {
+                padding: 20px 15px;
+            }
+
+            .container {
+                padding: 20px 12px;
+            }
+
+            .search-icon {
+                font-size: 1.5em;
+            }
+
+            .result-grid {
+                gap: 15px;
+            }
+
+            .search-box {
+                padding: 15px 20px;
+            }
+
+            input[type="text"] {
+                font-size: 1em;
+            }
+        }
+
+        /* Premium Success Animation */
+        @keyframes premium-success {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 0 15px rgba(0, 255, 136, 0); }
+        }
+
+        .result-grid.success {
+            animation: premium-success 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Premium Animated Background -->
+    <div class="bg-premium">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+
+    <!-- Premium Cursor -->
+    <div class="cursor" id="customCursor"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Premium Header -->
+        <div class="header">
+            <div class="header-badge">🔐 Enterprise SIM Database</div>
+            <h1>SIM Ownership</h1>
+            <p>Powered by Yahya</p>
+        </div>
+
+        <!-- Premium Card -->
+        <div class="card">
+            <!-- Search Box -->
+            <div class="search-container">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        id="phoneInput" 
+                        placeholder="Enter phone number (e.g., 03123456789)"
+                        autocomplete="off"
+                    >
+                    <button class="btn-search" id="searchBtn">Search</button>
+                </div>
+            </div>
+
+            <!-- Loader -->
+            <div class="loader" id="loader">
+                <div class="spinner"></div>
+                <p>Analyzing Data</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMsg"></div>
+
+            <!-- Results -->
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <!-- Premium Footer -->
+    <div class="footer">
+        <p id="copyrightText"></p>
+        <p>Follow: <a href="https://instagram.com/iamyahya012" target="_blank">@iamyahya012</a></p>
+    </div>
+
+    <script>
+        // Auto-update year dynamically
+        function updateCopyright() {
+            const currentYear = new Date().getFullYear();
+            document.getElementById('copyrightText').textContent = `© ${currentYear} SIM Ownership By Yahya. Enterprise Edition.`;
+        }
+        updateCopyright();
+
+        // Premium Cursor Implementation
+        const cursor = document.getElementById('customCursor');
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        });
+
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.classList.contains('btn-search') || e.target.classList.contains('result-item')) {
+                cursor.classList.add('active');
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            if (e.target.classList.contains('btn-search') || e.target.classList.contains('result-item')) {
+                cursor.classList.remove('active');
+            }
+        });
+
+        document.addEventListener('mouseleave', () => {
+            cursor.style.opacity = '0';
+        });
+
+        document.addEventListener('mouseenter', () => {
+            cursor.style.opacity = '1';
+        });
+
+        // DOM Elements
+        const phoneInput = document.getElementById('phoneInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // Event Listeners
+        searchBtn.addEventListener('click', performSearch);
+        phoneInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        // Search Function
+        function performSearch() {
+            const phoneNumber = phoneInput.value.trim();
+
+            if (!phoneNumber) {
+                showError('Please enter a phone number');
+                return;
+            }
+
+            if (phoneNumber.length < 10) {
+                showError('Invalid phone number format');
+                return;
+            }
+
+            hideError();
+            loader.classList.add('show');
+            results.classList.remove('show');
+            searchBtn.disabled = true;
+
+            // Fetch API
+            fetch(`https://sim-db-api.faizankhichi.me/?search=${encodeURIComponent(phoneNumber)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('API Error');
+                    return response.json();
+                })
+                .then(data => {
+                    loader.classList.remove('show');
+                    searchBtn.disabled = false;
+                    
+                    if (!data || Object.keys(data).length === 0) {
+                        showError('No results found for this number');
+                        return;
+                    }
+
+                    displayResults(data);
+                })
+                .catch(error => {
+                    loader.classList.remove('show');
+                    searchBtn.disabled = false;
+                    showError('Unable to fetch data. Please try again.');
+                    console.error('Error:', error);
+                });
+        }
+
+        // Display Results Function
+        function displayResults(data) {
+            const fieldsToHide = ['developer', 'channel', 'github', 'website', 'youtube', 'created_by', 'source', 'contact_developer'];
+            
+            let html = '<div class="result-grid success">';
+            let hasResults = false;
+
+            for (const [key, value] of Object.entries(data)) {
+                // Hide sensitive fields
+                if (fieldsToHide.some(field => key.toLowerCase().includes(field))) {
+                    continue;
+                }
+
+                // Handle data array (SIM entries)
+                if (key.toLowerCase() === 'data' && Array.isArray(value)) {
+                    value.forEach((entry, index) => {
+                        if (typeof entry === 'object' && entry !== null) {
+                            hasResults = true;
+                            html += `<div class="result-item">
+                                <div class="result-label">📱 SIM Entry ${index + 1}</div>
+                                <div class="nested-object">
+                                    ${Object.entries(entry).map(([k, v]) => `
+                                        <div class="nested-item">
+                                            <div class="nested-label">${formatLabel(k)}</div>
+                                            <div class="nested-value">${escapeHtml(String(v))}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>`;
+                        }
+                    });
+                    continue;
+                }
+
+                hasResults = true;
+                const formattedLabel = formatLabel(key);
+                
+                // Handle object values
+                if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                    html += `<div class="result-item">
+                        <div class="result-label">💎 ${formattedLabel}</div>
+                        <div class="nested-object">
+                            ${Object.entries(value).map(([k, v]) => `
+                                <div class="nested-item">
+                                    <div class="nested-label">${formatLabel(k)}</div>
+                                    <div class="nested-value">${escapeHtml(String(v))}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                } else if (typeof value !== 'object') {
+                    // Handle simple values
+                    html += `<div class="result-item">
+                        <div class="result-label">✓ ${formattedLabel}</div>
+                        <div class="result-value">${escapeHtml(String(value))}</div>
+                    </div>`;
+                }
+            }
+
+            if (!hasResults) {
+                showError('No relevant data found');
+                return;
+            }
+
+            html += '</div>';
+            results.innerHTML = html;
+            results.classList.add('show');
+        }
+
+        // Format Label Function
+        function formatLabel(key) {
+            return key
+                .replace(/_/g, ' ')
+                .replace(/([a-z])([A-Z])/g, '$1 $2')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+
+        // Escape HTML Function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Show Error Function
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.classList.add('show');
+        }
+
+        // Hide Error Function
+        function hideError() {
+            errorMsg.classList.remove('show');
+        }
+
+        // Auto-focus on load
+        phoneInput.focus();
+
+        // Security Features
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+                (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>
