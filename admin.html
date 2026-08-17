@@ -552,6 +552,8 @@
                             <th>#</th>
                             <th>Event</th>
                             <th>Element</th>
+                            <th>Label</th>
+                            <th>Page</th>
                             <th>Timestamp</th>
                             <th>User IP</th>
                             <th>Status</th>
@@ -559,7 +561,7 @@
                     </thead>
                     <tbody id="clicksTable">
                         <tr>
-                            <td colspan="6" class="no-data">No click data yet. Interactions will appear here.</td>
+                            <td colspan="7" class="no-data">No click data yet. Interactions will appear here.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -637,11 +639,30 @@
         document.getElementById('copyrightText').textContent = `© ${currentYear} SIM Ownership Analytics. All rights reserved.`;
 
         // Initialize analytics data from localStorage
-        let analyticsData = {
-            searches: JSON.parse(localStorage.getItem('analyticsSearches')) || [],
-            clicks: JSON.parse(localStorage.getItem('analyticsClicks')) || [],
-            ips: JSON.parse(localStorage.getItem('analyticsIPs')) || []
-        };
+        function loadAnalytics() {
+            const read = key => {
+                try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+                catch { return []; }
+            };
+            return {
+                searches: read('analyticsSearches'),
+                clicks: read('analyticsClicks'),
+                ips: read('analyticsIPs')
+            };
+        }
+        let analyticsData = loadAnalytics();
+
+        // Keep dashboard live when the main website changes shared localStorage.
+        window.addEventListener('storage', (event) => {
+            if (['analyticsSearches','analyticsClicks','analyticsIPs','analyticsClientIP'].includes(event.key)) {
+                analyticsData = loadAnalytics();
+                updateDashboard();
+            }
+        });
+        window.addEventListener('focus', () => {
+            analyticsData = loadAnalytics();
+            updateDashboard();
+        });
 
         // Navigation
         document.querySelectorAll('.nav-link').forEach(link => {
@@ -673,14 +694,31 @@
         // Update Stats
         function updateStats() {
             const totalSearches = analyticsData.searches.length;
-            const uniqueIPs = new Set(analyticsData.searches.map(s => s.ip)).size;
+            const visitorIds = analyticsData.searches.map(s => s.clientId || s.ip).filter(Boolean);
+            const uniqueVisitors = new Set(visitorIds).size;
             const totalClicks = analyticsData.clicks.length;
             const successfulSearches = analyticsData.searches.filter(s => s.success).length;
             const successRate = totalSearches > 0 ? Math.round((successfulSearches / totalSearches) * 100) : 0;
 
+            // Calculate average session duration from tracked click/page-view events.
+            const sessions = {};
+            (analyticsData.clicks || []).forEach(c => {
+                const sid = c.sessionId || c.clientId || c.ip || 'unknown';
+                const t = Date.parse(c.timestamp);
+                if (!Number.isNaN(t)) {
+                    if (!sessions[sid]) sessions[sid] = { first: t, last: t };
+                    sessions[sid].first = Math.min(sessions[sid].first, t);
+                    sessions[sid].last = Math.max(sessions[sid].last, t);
+                }
+            });
+            const sessionDurations = Object.values(sessions).map(s => Math.max(0, s.last - s.first));
+            const avgMs = sessionDurations.length ? sessionDurations.reduce((a,b) => a+b, 0) / sessionDurations.length : 0;
+            const avgSeconds = Math.round(avgMs / 1000);
+            const avgSession = avgSeconds >= 60 ? `${Math.floor(avgSeconds / 60)}m ${avgSeconds % 60}s` : `${avgSeconds}s`;
+
             document.getElementById('totalSearches').textContent = totalSearches;
-            document.getElementById('uniqueVisitors').textContent = uniqueIPs;
-            document.getElementById('avgSession').textContent = '2m 45s';
+            document.getElementById('uniqueVisitors').textContent = uniqueVisitors;
+            document.getElementById('avgSession').textContent = avgSession;
             document.getElementById('successRate').textContent = successRate + '%';
             document.getElementById('totalClicks').textContent = totalClicks;
             document.getElementById('totalCountries').textContent = new Set(analyticsData.ips.map(ip => ip.country || 'Unknown')).size;
@@ -714,21 +752,29 @@
 
         function updateClicksTable() {
             const table = document.getElementById('clicksTable');
-            if (analyticsData.clicks.length === 0) {
-                table.innerHTML = '<tr><td colspan="6" class="no-data">No click data yet.</td></tr>';
+            const clicks = analyticsData.clicks || [];
+            if (clicks.length === 0) {
+                table.innerHTML = '<tr><td colspan="7" class="no-data">No click data yet. Interactions will appear here.</td></tr>';
                 return;
             }
 
-            table.innerHTML = analyticsData.clicks.slice(-20).map((click, index) => `
+            table.innerHTML = clicks.slice(-100).reverse().map((click, index) => `
                 <tr>
                     <td>${index + 1}</td>
-                    <td>${click.event}</td>
-                    <td>${click.element}</td>
+                    <td>${escapeTable(click.event || 'click')}</td>
+                    <td>${escapeTable(click.element || 'unknown')}</td>
+                    <td>${escapeTable(click.label || '')}</td>
+                    <td>${escapeTable(click.page || '/')}</td>
                     <td>${new Date(click.timestamp).toLocaleString()}</td>
-                    <td><code>${click.ip || 'Unknown'}</code></td>
-                    <td><span class="badge badge-info">Recorded</span></td>
+                    <td><code>${escapeTable(click.ip || 'Unknown')}</code></td>
                 </tr>
             `).join('');
+        }
+
+        function escapeTable(value) {
+            const div = document.createElement('div');
+            div.textContent = String(value ?? '');
+            return div.innerHTML;
         }
 
         function updateIPsTable() {
@@ -850,6 +896,12 @@
             });
             localStorage.setItem('analyticsClicks', JSON.stringify(analyticsData.clicks));
         };
+
+        // Auto-refresh so the dashboard behaves like a live analytics console.
+        setInterval(() => {
+            analyticsData = loadAnalytics();
+            updateDashboard();
+        }, 2000);
 
         // Initialize
         updateDashboard();
